@@ -7,8 +7,8 @@ the output without a judge model, so any result can be re-run and checked.
 Tabletop Bench is made by the [Action Stations](https://actionstations.ai) project. It runs the Action
 Stations app's own generation pipeline on fixed, versioned task sets.
 
-- Leaderboard: [Hugging Face Space](https://huggingface.co/spaces/mdctric/tabletop-bench-leaderboard) and [actionstations.ai/tabletop-bench](https://actionstations.ai/tabletop-bench/)
-- Dataset (tasks, results): [huggingface.co/datasets/mdctric/tabletop-bench](https://huggingface.co/datasets/mdctric/tabletop-bench)
+- Leaderboard: [actionstations.ai/tabletop-bench](https://actionstations.ai/tabletop-bench/) (a Hugging Face Space follows)
+- Dataset (tasks, results): in this repository; a Hugging Face dataset follows
 
 ## Results
 
