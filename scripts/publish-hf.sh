@@ -31,7 +31,8 @@ exists "$DATASET" dataset || hf repo create "$DATASET" --repo-type dataset --pri
 hf upload "$DATASET" dist/hf/dataset . --repo-type dataset \
   --commit-message "Update Tabletop Benchmark and Tabletop Mini Benchmark dataset"
 exists "$SPACE" space || hf repo create "$SPACE" --repo-type space --space_sdk static --private
-hf upload "$SPACE" dist/hf/space . --repo-type space \
-  --commit-message "Update leaderboard"
+# hf upload would try to create the Space (as Gradio, a paid type for organizations); upload_folder
+# only uploads.
+python3 -c "import sys; from huggingface_hub import HfApi; HfApi().upload_folder(repo_id=sys.argv[1], repo_type='space', folder_path='dist/hf/space', commit_message='Update leaderboard')" "$SPACE"
 echo "https://huggingface.co/datasets/$DATASET"
 echo "https://huggingface.co/spaces/$SPACE"
