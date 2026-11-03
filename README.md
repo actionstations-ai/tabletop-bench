@@ -7,9 +7,10 @@ the output without a judge model, so any result can be re-run and checked.
 There are two benchmarks on the same scoring:
 
 - **Tabletop Benchmark**: the full benchmark, an evening per model. It ranks models.
-- **Tabletop Mini Benchmark**: a screening, a few minutes per model. Four fixed model calls and a
-  verdict, **will work**, **risky** or **won't work**, with the reasons. It is never ranked with the
-  full benchmark.
+- **Tabletop Mini Benchmark**: a screening, about ten minutes per model. Four fixed model calls,
+  each run twice, scored as **quality x completion** and placed in a band: **Recommended**,
+  **Usable with editing** or **Not recommended**. It reads no result of the full benchmark and is
+  never ranked with it.
 
 Tabletop Benchmark is made by the [Action Stations](https://actionstations.ai) project. It runs the Action
 Stations app's own generation pipeline on fixed, versioned task sets.
@@ -27,7 +28,7 @@ First results coming.
 
 ### Tabletop Mini Benchmark
 
-A screening: a verdict in minutes, never ranked with the full benchmark.
+A screening: score = quality x completion, a band from stated requirements, never ranked with the full benchmark.
 
 First results coming.
 
@@ -56,23 +57,30 @@ every scored part, its weight, the seeds and the threshold for "unstable".
 
 ## The Mini Benchmark
 
-Four calls on fixed inputs taken from the bundled example organizations, plus timing. About ten
-minutes for a 30B model; the same command runs a list of models.
+Four calls on fixed inputs taken from the bundled example organizations, each run twice, with no
+time limit on a call. About ten minutes for a 30B model; the same command runs a list of models.
 
-| Probe       | The model                                                                              | What decides it                                                      |
-| ----------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| Format      | writes the scenario overview as structured output                                      | a valid answer; repair rounds                                        |
-| Long prompt | writes the last MSEL phase of a chemical plant scenario from a 20 to 30K-token prompt  | lint, citations and structure of that phase; a length cut-off fails  |
-| Long output | writes the controller handbook for a water utility MSEL                                | finishes, has its sections, does not loop                            |
-| Review      | reviews a county 911 scenario with planted defects                                     | defects found or fixed, damage to correct rows                       |
-| Speed       | (the calls above)                                                                      | output tokens per second, time for the long prompt                   |
+| Probe       | The model                                                                              | What counts                                                              |
+| ----------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Format      | writes the scenario overview as structured output                                      | a valid answer on the first try                                          |
+| Long prompt | writes a full 18-row phase of a chemical plant scenario from a 20 to 30K-token prompt  | pace, purpose-tag mix, citations, structure and lint against the reference |
+| Long output | writes the controller handbook for a water utility MSEL                                | all sections, enough text, no repetition                                 |
+| Review      | reviews a county 911 scenario with planted defects                                     | each planted defect found or fixed                                       |
 
-A call that runs longer than three minutes is cancelled and counts as a failure. The verdict:
-*won't work* if a generation call fails, is cut off or times out; *risky* if everything ran but a
-call needed repair, the handbook repeats itself, the review damages 10% or more of correct rows,
-output is slow, or the score is low; *will work* otherwise. [docs/METHODS.md](docs/METHODS.md)
-has the thresholds. A Mini result is a screening and is always listed as `community`; it is
-never `verified`. One held-out review case is kept by the maintainers and is not in the task set.
+**Mini score = Quality x Completion.**
+
+- **Completion** is the chance that a full scenario drafts with no failed stage: the share of Mini
+  calls that succeeded first time (no failure, no repair round, no reply cut off and asked again),
+  raised to the 14 model calls in a scenario. The per-call rate is shown too.
+- **Quality** (0 to 100) is the share of fixed criteria the replies meet, against the Scenario 3
+  reference and the planted defects.
+
+Shown next to the score, not part of it: **review damage** (the share of correct rows the review
+changed) and **draft time** (minutes for a full scenario on this hardware). A slow draft time is
+reported and never a failure. Every figure shows its range over the two runs, and models whose
+ranges overlap are a tie. [docs/METHODS.md](docs/METHODS.md) has the criteria, the bands and the
+formulas. A Mini result is a screening and is always listed as `community`; it is never
+`verified`. One held-out review case is kept by the maintainers and is not in the task set.
 
 ## Task sets
 

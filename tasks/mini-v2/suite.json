@@ -1,0 +1,83 @@
+{
+  "suite": "mini",
+  "suiteVersion": 2,
+  "kind": "mini",
+  "description": "Tabletop Mini Benchmark: four model calls on fixed inputs from the bundled examples (format, a full MSEL phase on a long prompt, a long handbook, a review of planted defects), each run twice, with no time cap. It scores Quality x Completion and reports review damage and draft time next to it. It screens a model; it does not replace the full Tabletop Benchmark and reads none of its results.",
+  "repeats": 2,
+  "seeds": [11, 12],
+  "contextLength": 32768,
+  "ideationCount": 0,
+  "stream": {
+    "firstTokenSeconds": 600,
+    "stallSeconds": 60,
+    "loopMinChars": 400,
+    "loopMinRepeats": 5
+  },
+  "weights": {
+    "critique": {
+      "recall": 0.65,
+      "noise": 0.1,
+      "intact": 0.25
+    }
+  },
+  "thresholds": {
+    "noisePenaltyPer10Rows": 20,
+    "damagePenaltyPerPercent": 2
+  },
+  "quality": {
+    "paceBand": [0.8, 1.25],
+    "phaseMinRows": 15,
+    "citationResolution": 90,
+    "citationCoverage": 80,
+    "citationSupport": 70,
+    "lintPenaltyPer10Rows": 5,
+    "handbookSections": 5,
+    "handbookMinWords": 1000,
+    "handbookMaxRepetition": 0.25
+  },
+  "bands": {
+    "recommended": {
+      "completion": 90,
+      "quality": 80,
+      "damage": 5
+    },
+    "usable": {
+      "completion": 75,
+      "quality": 60
+    }
+  },
+  "scenarioBudget": {
+    "phases": 4,
+    "modelStages": 14,
+    "inputTokens": 237242,
+    "outputTokens": 37839
+  },
+  "probes": {
+    "format": {
+      "example": "city-water",
+      "scenario": "chem",
+      "stage": "scenario_overview"
+    },
+    "longContext": {
+      "example": "chemical-rmp",
+      "scenario": "rail-spot-release",
+      "stage": "msel_phase",
+      "phaseIndex": 3,
+      "phaseMinutes": 180
+    },
+    "longOutput": {
+      "example": "city-water",
+      "scenario": "chem",
+      "stage": "controller_handbook"
+    }
+  },
+  "ideation": [],
+  "drafting": [],
+  "critique": [
+    {
+      "id": "county-911-storm-tdos",
+      "example": "county-911",
+      "defects": "county-911-storm-tdos"
+    }
+  ]
+}

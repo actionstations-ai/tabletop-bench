@@ -65,39 +65,96 @@ Context length is 32,768 tokens; stages send up to about 30,000 input tokens.
 
 ## Tabletop Mini Benchmark
 
-A screening, not a ranking. Task set `mini-v1`; one seed (11); context 32,768 tokens. Each probe
-re-runs one stage of the app's pipeline on a bundled example's hand-corrected scenario, so the
-upstream inputs (phase plan, roles, MSEL, corpus) are the same for every model, and each probe
-works on its own copy of the example.
+A screening, not a ranking. Task set `mini-v2`; seeds 11 and 12, so every probe runs twice; context
+32,768 tokens. Each probe re-runs one stage of the app's pipeline on a bundled example's
+hand-corrected scenario, so the upstream inputs (phase plan, roles, MSEL, corpus) are the same for
+every model, and each probe works on its own copy of the example in each run.
 
-| Probe | Call | Scored with |
-| --- | --- | --- |
-| Format | `scenario_overview`, city water | valid structured output; repair rounds |
-| Long prompt | `msel_phase`, last phase, chemical plant (the prompt carries the corpus, plan, roles and the earlier phases' rows) | the lint, citation (resolution, coverage, source check) and structure scorers of the full benchmark, on that phase's rows: lint 0.3, citations 0.3, structure 0.4 |
-| Long output | `controller_handbook`, city water | sections present (0.5) and share of repeated 6-word phrases (0.5); a length cut-off is a failed call |
-| Review | critique and revision of the county 911 case with planted defects | the full benchmark's critique scorer: recall, fixed, damage to correct rows, noise |
-| Speed | the calls above | output tokens per second; size and time of the long-prompt call |
+**Independence.** Nothing in the Mini's scoring, bands or token budget reads a result of the full
+Tabletop Benchmark. Quality is measured against the Scenario 3 reference and the planted defects;
+the bands are the requirements below, not a calibration against another benchmark. Agreement with
+the full benchmark may be reported as a cross-check and changes nothing here.
 
-**Time cap.** A call that runs longer than 180 seconds is cancelled and recorded as a failure.
+| Probe | Call |
+| --- | --- |
+| Format | `scenario_overview`, city water |
+| Long prompt | `msel_phase`, last phase, chemical plant, stretched to 180 minutes so the model writes a full phase (18 rows asked, 21 allowed) with the corpus, plan, roles and every earlier phase's rows in the prompt |
+| Long output | `controller_handbook`, city water |
+| Review | critique and revision of the county 911 case with planted defects |
 
-**Mini score** = format 0.10, long prompt 0.35, long output 0.20, review 0.35.
+### Mini score = Quality x Completion
 
-**Verdict.**
+**Completion** is the chance that a full scenario drafts with no failed stage. A call is a
+*first-try success* when it returns a usable reply with no failure, no repair round and no reply
+cut off at the length limit and asked again. The per-call rate is the share of first-try successes
+over every Mini call of both runs. Completion is that rate raised to the number of model calls in a
+scenario. The pipeline makes one call per stage and one `msel_phase` call per phase: scenario
+overview, objectives and roles, phase plan, four MSEL phases, controller handbook, rubric,
+evaluation guides, player briefing, hot wash, situation manual and review, which is **14 calls**.
+Completion falls fast: 98% of calls succeeding first time gives 75%, and one failure in eight Mini
+calls gives 15%.
 
-- *Won't work*: the format, long-prompt or long-output call failed, was cut off or timed out; or the Mini score is under 45.
-- *Risky*: all calls ran and any of: score under 60; a repair round in a generation call; a handbook with 25% or more repeated phrases; a review that damages 10% or more of correct rows, finds under 30% of planted defects, or failed; under 15 output tokens per second; the long prompt taking over 150 seconds.
-- *Will work*: none of the above.
+**Quality** is the share of criteria met, 0 to 100, over the replies the model delivered. A call
+that returned nothing adds no criteria; it costs completion, so a failure is counted once. The
+criteria are fixed pass/fail statements; thresholds are in `tasks/mini-v2/suite.json`.
 
-Thresholds are in `tasks/mini-v1/suite.json` and are part of the task-set hash. The review damage
-warning follows from the 2026-11-03 runs, where one model's review rewrote correct rows; critique
-remains advisory in the full benchmark. A held-out review case on another organization is run by
-the maintainers and is not in the published task set. A model whose failure depends on its own
-earlier output can pass the Mini's fixed inputs; the full benchmark is the check for that.
+| Probe | Criteria |
+| --- | --- |
+| Long prompt | at least 15 rows in the phase; rows per hour within 0.8 to 1.25 of the Scenario 3 band (5 to 6); every purpose-tag group of the reference present (the decision point is excepted: it belongs to one middle phase); opens with its time jump and, as the last phase, ends with the ENDEX; every role receives an inject; the brief ids are used; no text copied from the reference; citations resolved at least 90%; rows citing a source at least 80%; claims supported by the source at least 70% (only when the source check found claim-bearing rows); no lint errors; lint penalty at most 5 per 10 rows |
+| Handbook | all 5 sections; at least 1,000 words (the bundled handbooks run 1,500 to 1,650); under 25% repeated 6-word phrases |
+| Review | one criterion per planted defect: found by a note, or no longer in the revised MSEL |
+
+The format probe adds no criteria; it counts in completion.
+
+### Shown alongside, not mixed in
+
+- **Review damage %**: the share of correct rows the review's revision changed, with the deliberate
+  content (pressure, misinformation, clue and red-herring rows) weighted three times, as in the full
+  benchmark's critique scorer. Mean of the review calls of a run.
+- **Draft time**: minutes for a full scenario on this hardware. Per run, the calls' own timings give
+  a prompt rate P and a generation rate G by least squares on `seconds = input / P + output / G`
+  (one pooled rate if the fit is not usable). Draft time is `input / P + output / G` for the
+  token budget of a scenario: **237,242 input and 37,839 output tokens**, the mean over the
+  bundled example scenarios of the token counts recorded for each pipeline stage (a phase call times
+  four). The recorded counts come from the models that drafted the examples; a model that thinks at
+  length writes more. Injects and media are not part of the scenario pipeline and are not counted.
+
+### Bands
+
+Requirements, applied to the reported values:
+
+- **Recommended**: completion at least 90%, quality at least 80 and review damage at most 5%.
+- **Usable with editing**: completion at least 75% and quality at least 60.
+- **Not recommended**: anything else.
+
+When the ranges over the two runs reach into another band, the run file says so (`uncertain`).
+
+### No time cap
+
+A call is never ended for taking long. The adapter streams the reply and ends the call only on:
+
+- a **stall**: no new output token for 60 seconds once the reply has started, or for 600 seconds
+  before the first token (the time the prompt is read); or
+- a **loop**: the end of the reply is one unit repeated at least 5 times and over at least 400
+  characters.
+
+The limits are in the suite file and are part of the task-set hash. A stalled or looping call is a
+failed call; the run file keeps its kind and the last 400 characters of the reply.
+
+### Ranges and ties
+
+Every figure is the mean of the two runs with its minimum and maximum. The score's range is the two
+runs' own scores, widened to include the reported score. Two models whose score ranges overlap are a
+tie and share a rank; the leaderboard marks them.
+
+A held-out review case on another organization is run by the maintainers and is not in the
+published task set. A model whose failure depends on its own earlier output can pass the Mini's
+fixed inputs; the full benchmark is the check for that.
 
 ## Fields in every result
 
-(The Mini run file has the same identifying fields plus `probes`, `speed`, `score` and `verdict`
-instead of repeats and medians.)
+(The Mini run file has the same identifying fields plus the stream limits, two `repeats` with their
+probes, criteria and failures, a `result` with every figure and its range, and the `verdict` band.)
 
 
 Suite, suite version, scoring version, task-set hash, app version and commit, prompt hashes,

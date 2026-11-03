@@ -171,19 +171,24 @@
         ['Status', (r) => r.status, false],
         ['Runs', (r) => String(r.runs), true],
       ]
-      const LEVELS = { will_work: 'Will work', risky: 'Risky', wont_work: "Won't work" }
+      const LEVELS = {
+        recommended: 'Recommended',
+        usable: 'Usable with editing',
+        not_recommended: 'Not recommended',
+      }
+      const fig = (f, unit = '') =>
+        f ? (f.min === f.max ? `${f.value}${unit}` : `${f.value}${unit} (${f.min} to ${f.max})`) : 'n/a'
       const MINI_COLUMNS = [
+        ['Rank', (r) => `${r.rank}${r.tied ? '=' : ''}`, true],
         ['Model', (r) => r.model, false],
         ['Quantization', (r) => r.quantization ?? 'n/a', false],
         ['Profile', (r) => r.profile, false],
-        ['Verdict', (r) => LEVELS[r.verdict] ?? r.verdict, false],
-        ['Score', (r) => String(r.score), true],
-        ['Format', (r) => num(r.probes.format), true],
-        ['Long prompt', (r) => num(r.probes.longContext), true],
-        ['Long output', (r) => num(r.probes.longOutput), true],
-        ['Review', (r) => num(r.probes.review), true],
-        ['Tokens/s', (r) => num(r.tokensPerSecond), true],
-        ['Seconds', (r) => String(r.totalSeconds), true],
+        ['Band', (r) => LEVELS[r.band] ?? r.band, false],
+        ['Score', (r) => fig(r.score), true],
+        ['Quality', (r) => fig(r.quality), true],
+        ['Completion', (r) => fig(r.completion, '%'), true],
+        ['Review damage', (r) => fig(r.damage, '%'), true],
+        ['Draft time', (r) => fig(r.draftMinutes, ' min'), true],
         ['Status', (r) => r.status, false],
       ]
       const num = (n) => (n === null || n === undefined ? 'n/a' : String(n))
@@ -261,7 +266,7 @@
         out.append(
           el(
             'p',
-            'A screening: four fixed model calls and a verdict in minutes. It is never ranked with the full benchmark.',
+            'A screening: score = quality x completion and a band from stated requirements. Rows marked = have overlapping score ranges and are a tie. It is never ranked with the full benchmark.',
             'legend',
           ),
         )

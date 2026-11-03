@@ -30,7 +30,9 @@ Anyone can submit a run by pull request.
 To submit a Tabletop Mini Benchmark result instead, run
 `node tb.mjs run --suite mini --models lmstudio:<id>[,<id>…]` (LM Studio models are loaded at a
 32K context and unloaded for you; pass `--no-load` to manage them yourself) and add each file the
-same way. A Mini result is a screening: it is always listed as `community` and cannot be verified.
+same way. A Mini run makes every call twice, with no time limit (a stalled or looping reply ends a
+call), so a slow model takes as long as it takes. A Mini result is a screening: it is always listed
+as `community` and cannot be verified.
 
 Your run is listed as `community`. We rerun it on our hardware when we can; if the rerun agrees
 within the tolerance in `VERIFYING.md` it becomes `verified`.

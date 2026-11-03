@@ -6,6 +6,6 @@ First results coming.
 
 ### Tabletop Mini Benchmark
 
-A screening: a verdict in minutes, never ranked with the full benchmark.
+A screening: score = quality x completion, a band from stated requirements, never ranked with the full benchmark.
 
 First results coming.

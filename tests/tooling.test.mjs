@@ -50,7 +50,7 @@ function makeRun(over = {}) {
 
 describe('task sets', () => {
   it('ship with the quick, standard and mini suites and every file matches its hash', () => {
-    assert.deepEqual(sets.map((s) => s.name), ['mini-v1', 'quick-v1', 'standard-v1'])
+    assert.deepEqual(sets.map((s) => s.name), ['mini-v2', 'quick-v1', 'standard-v1'])
     for (const s of sets) assert.deepEqual(checkTaskSet(s), { ok: true, problems: [] })
   })
 
@@ -152,13 +152,18 @@ describe('leaderboard', () => {
 })
 
 describe('Tabletop Mini Benchmark', () => {
-  const mini = sets.find((s) => s.name === 'mini-v1')
-  const probe = (score = 80) => ({ ok: true, score, metrics: {} })
+  const mini = sets.find((s) => s.name === 'mini-v2')
+  const range = (value, min = value, max = value) => ({ value, min, max })
+  const probe = () => ({ ok: true, firstTry: true, score: 80, criteria: [], metrics: {} })
+  const repeat = (seed) => ({
+    seed,
+    probes: { format: probe(), longContext: probe(), longOutput: probe(), review: probe() },
+  })
   const makeMini = (over = {}) => ({
     formatVersion: 1,
     kind: 'mini',
     suite: 'mini',
-    suiteVersion: 1,
+    suiteVersion: 2,
     scoringVersion: 1,
     taskSetHash: mini.manifest.hash,
     appVersion: '0.6.2',
@@ -172,19 +177,35 @@ describe('Tabletop Mini Benchmark', () => {
       inference: { profile: 'model-9b' },
     },
     hardware: { platform: 'darwin', arch: 'arm64', ramGb: 64 },
-    probes: { format: probe(100), longContext: probe(70), longOutput: probe(90), review: probe(60) },
-    speed: { outputTokensPerSecond: 55, totalSeconds: 300 },
-    score: 78,
-    verdict: { level: 'will_work', reasons: ['all probes ran'] },
+    stream: { firstTokenSeconds: 600, stallSeconds: 60, loopMinChars: 400, loopMinRepeats: 5 },
+    repeats: [repeat(11), repeat(12)],
+    result: {
+      score: range(78, 74, 82),
+      quality: range(80, 78, 82),
+      perCallRate: range(100),
+      completion: range(100),
+      damage: range(2, 0, 4),
+      draftMinutes: range(30, 28, 32),
+      calls: 8,
+      firstTryCalls: 8,
+    },
+    verdict: { level: 'usable', reasons: ['Quality 80'], notes: [] },
     ...over,
   })
-  const entry = (file, run) => ({ file, suiteDir: 'mini-v1', run })
+  const entry = (file, run) => ({ file, suiteDir: 'mini-v2', run })
 
   it('accepts a complete Mini run and refuses a bad verdict, a mock model and paths', () => {
     assert.equal(validateRun(makeMini(), sets).ok, true)
     assert.match(validateRun(makeMini({ verdict: { level: 'great' } }), sets).problems.join(), /verdict/)
     assert.equal(validateRun(makeMini({ model: { ...makeMini().model, tool: 'mock' } }), sets).ok, false)
     assert.equal(validateRun(makeMini({ note: '/Users/someone/run' }), sets).ok, false)
+  })
+
+  it('refuses a Mini run with one repeat or a score without a range', () => {
+    assert.match(validateRun(makeMini({ repeats: [repeat(11)] }), sets).problems.join(), /twice/)
+    const bad = makeMini()
+    bad.result.score = { value: 78 }
+    assert.match(validateRun(bad, sets).problems.join(), /result\.score/)
   })
 
   it('keeps the Mini task set apart from the others', () => {
@@ -197,7 +218,7 @@ describe('Tabletop Mini Benchmark', () => {
     assert.equal(board.mini.length, 1)
     const text = leaderboardMarkdown(board)
     assert.match(text, /### Tabletop Mini Benchmark/)
-    assert.match(text, /\| Will work \| 78 \|/)
+    assert.match(text, /\| Usable with editing \| 78 \(74 to 82\) \|/)
     assert.match(text, /\| community \|/)
   })
 
@@ -209,8 +230,27 @@ describe('Tabletop Mini Benchmark', () => {
   })
 
   it('shows the latest run of a model setting', () => {
-    const newer = makeMini({ startedAt: '2026-12-01T00:00:00.000Z', score: 50, verdict: { level: 'risky', reasons: ['x'] } })
+    const newer = makeMini({
+      startedAt: '2026-12-01T00:00:00.000Z',
+      verdict: { level: 'not_recommended', reasons: ['x'], notes: [] },
+    })
     const board = buildLeaderboard([entry('old.json', makeMini()), entry('new.json', newer)], {})
-    assert.deepEqual(board.mini.map((r) => [r.file, r.verdict]), [['new.json', 'risky']])
+    assert.deepEqual(board.mini.map((r) => [r.file, r.band]), [['new.json', 'not_recommended']])
+  })
+
+  it('ranks Mini rows by score and shows overlapping score ranges as a tie', () => {
+    const named = (name, score) => {
+      const run = makeMini()
+      run.model = { ...run.model, ref: `lmstudio:${name}`, name }
+      run.result.score = score
+      return entry(`${name}.json`, run)
+    }
+    const board = buildLeaderboard(
+      [named('a', range(90, 86, 94)), named('b', range(85, 80, 89)), named('c', range(60, 58, 62))],
+      {},
+    )
+    assert.deepEqual(board.mini.map((r) => [r.model, r.rank, r.tied]), [['a', 1, true], ['b', 1, true], ['c', 3, false]])
+    assert.match(leaderboardMarkdown(board), /\| 1= \| a \|/)
+    assert.match(leaderboardMarkdown(board), /\| 3 \| c \|/)
   })
 })

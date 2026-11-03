@@ -20,8 +20,9 @@ configs:
 A benchmark of how well language models generate tabletop exercises: a scenario, its master
 scenario events list (MSEL) with citations to source plans, and a review that finds planted
 defects. Scoring is rule-based and uses no judge model. The dataset also holds the Tabletop Mini
-Benchmark, a screening that makes four fixed model calls and returns a verdict (will work, risky,
-won't work) in minutes; its results are never ranked with the full benchmark. Made by the
+Benchmark, a screening that makes four fixed model calls twice, scores quality x completion and
+places the model in a band (Recommended, Usable with editing, Not recommended); its results are
+never ranked with the full benchmark. Made by the
 [Action Stations](https://actionstations.ai) project.
 
 - Code and methods: https://github.com/actionstations-ai/tabletop-bench
