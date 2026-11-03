@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Tabletop Bench: a benchmark of how well LLMs generate tabletop exercises",
+  "description": "Tabletop Benchmark: a benchmark of how well LLMs generate tabletop exercises",
   "license": "SEE LICENSE IN LICENSE.md",
   "engines": { "node": ">=20" },
   "scripts": {

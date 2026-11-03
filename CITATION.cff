@@ -1,6 +1,6 @@
 cff-version: 1.2.0
-message: "If you use Tabletop Bench, cite it as below."
-title: "Tabletop Bench: a benchmark of how well language models generate tabletop exercises"
+message: "If you use Tabletop Benchmark, cite it as below."
+title: "Tabletop Benchmark: a benchmark of how well language models generate tabletop exercises"
 type: dataset
 version: 0.1.0
 date-released: 2026-11-03

@@ -1,6 +1,6 @@
 # Data license: CC BY 4.0
 
-The task sets (`tasks/`), result files (`results/`), verification records (`verification/`) and leaderboard data (`leaderboard/`) of Tabletop Bench are licensed under the Creative Commons Attribution 4.0 International license. Attribute as in `CITATION.cff`. The code (`tb.mjs`, `lib/`, `tests/`) is under the PolyForm Internal Use License 1.0.0 with the education permission (`LICENSE.md`, `LICENSE-EDUCATION.md`).
+The task sets (`tasks/`), result files (`results/`), verification records (`verification/`) and leaderboard data (`leaderboard/`) of Tabletop Benchmark are licensed under the Creative Commons Attribution 4.0 International license. Attribute as in `CITATION.cff`. The code (`tb.mjs`, `lib/`, `tests/`) is under the PolyForm Internal Use License 1.0.0 with the education permission (`LICENSE.md`, `LICENSE-EDUCATION.md`).
 
 Full legal code, from https://creativecommons.org/licenses/by/4.0/legalcode.txt:
 

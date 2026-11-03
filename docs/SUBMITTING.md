@@ -27,6 +27,11 @@ Anyone can submit a run by pull request.
 5. Open a pull request with the new file and the regenerated tables. Do not edit other results.
    Say in the description what hardware you used and anything unusual (a model you converted yourself, a patched runtime).
 
+To submit a Tabletop Mini Benchmark result instead, run
+`node tb.mjs run --suite mini --models lmstudio:<id>[,<id>…]` (LM Studio models are loaded at a
+32K context and unloaded for you; pass `--no-load` to manage them yourself) and add each file the
+same way. A Mini result is a screening: it is always listed as `community` and cannot be verified.
+
 Your run is listed as `community`. We rerun it on our hardware when we can; if the rerun agrees
 within the tolerance in `VERIFYING.md` it becomes `verified`.
 

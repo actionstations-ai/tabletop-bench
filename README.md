@@ -1,24 +1,39 @@
-# Tabletop Bench
+# Tabletop Benchmark
 
 A benchmark of how well language models generate tabletop exercises: the scenario, the master
 scenario events list (MSEL) and the review of it. It runs open-weight models locally and scores
 the output without a judge model, so any result can be re-run and checked.
 
-Tabletop Bench is made by the [Action Stations](https://actionstations.ai) project. It runs the Action
+There are two benchmarks on the same scoring:
+
+- **Tabletop Benchmark**: the full benchmark, an evening per model. It ranks models.
+- **Tabletop Mini Benchmark**: a screening, a few minutes per model. Four fixed model calls and a
+  verdict, **will work**, **risky** or **won't work**, with the reasons. It is never ranked with the
+  full benchmark.
+
+Tabletop Benchmark is made by the [Action Stations](https://actionstations.ai) project. It runs the Action
 Stations app's own generation pipeline on fixed, versioned task sets.
 
-- Leaderboard: [actionstations.ai/tabletop-bench](https://actionstations.ai/tabletop-bench/) (a Hugging Face Space follows)
-- Dataset (tasks, results): in this repository; a Hugging Face dataset follows
+- Leaderboard: [actionstations.ai/tabletop-bench](https://actionstations.ai/tabletop-bench/), and a Hugging Face Space (`actionstations/tabletop-benchmark-leaderboard`) once published
+- Dataset (tasks, results): in this repository, and on Hugging Face (`actionstations/tabletop-benchmark`) once published
 
 ## Results
 
 <!-- leaderboard:begin -->
 
+### Tabletop Benchmark
+
+First results coming.
+
+### Tabletop Mini Benchmark
+
+A screening: a verdict in minutes, never ranked with the full benchmark.
+
 First results coming.
 
 <!-- leaderboard:end -->
 
-No numbers are published yet. The first runs will use the model-card sampling settings of the
+No numbers are published yet for either benchmark. The first runs will use the model-card sampling settings of the
 app's model profiles, and each row will show whether we reproduced it:
 
 - `community`: submitted by someone, not yet reproduced by us.
@@ -39,6 +54,26 @@ center), scored 0 to 100 by rules, never by a model:
 Overall = 0.5 drafting + 0.25 critique + 0.25 ideation. [docs/METHODS.md](docs/METHODS.md) lists
 every scored part, its weight, the seeds and the threshold for "unstable".
 
+## The Mini Benchmark
+
+Four calls on fixed inputs taken from the bundled example organizations, plus timing. About ten
+minutes for a 30B model; the same command runs a list of models.
+
+| Probe       | The model                                                                              | What decides it                                                      |
+| ----------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Format      | writes the scenario overview as structured output                                      | a valid answer; repair rounds                                        |
+| Long prompt | writes the last MSEL phase of a chemical plant scenario from a 20 to 30K-token prompt  | lint, citations and structure of that phase; a length cut-off fails  |
+| Long output | writes the controller handbook for a water utility MSEL                                | finishes, has its sections, does not loop                            |
+| Review      | reviews a county 911 scenario with planted defects                                     | defects found or fixed, damage to correct rows                       |
+| Speed       | (the calls above)                                                                      | output tokens per second, time for the long prompt                   |
+
+A call that runs longer than three minutes is cancelled and counts as a failure. The verdict:
+*won't work* if a generation call fails, is cut off or times out; *risky* if everything ran but a
+call needed repair, the handbook repeats itself, the review damages 10% or more of correct rows,
+output is slow, or the score is low; *will work* otherwise. [docs/METHODS.md](docs/METHODS.md)
+has the thresholds. A Mini result is a screening and is always listed as `community`; it is
+never `verified`. One held-out review case is kept by the maintainers and is not in the task set.
+
 ## Task sets
 
 `tasks/<suite>-v<N>/` holds a task set: the suite file, planted defects, gold statistics, judge
@@ -52,6 +87,7 @@ LM Studio or Ollama on this machine, and Node 20 or later here.
 
 ```bash
 export ACTIONSTATIONS_APP=~/Code/actionstations
+node tb.mjs run --suite mini --models lmstudio:qwen/qwen3.5-9b,lmstudio:google/gemma-3-12b   # minutes per model; loads and unloads LM Studio models
 node tb.mjs run --suite quick --models lmstudio:qwen/qwen3.5-9b       # about an hour for a 9B model
 node tb.mjs run --suite standard --models ollama:qwen3.5:9b --add     # an evening; --add also adds the result
 ```
@@ -85,8 +121,8 @@ user names.
 ## Cite
 
 ```bibtex
-@misc{tabletopbench2026,
-  title        = {Tabletop Bench: a benchmark of how well language models generate tabletop exercises},
+@misc{tabletopbenchmark2026,
+  title        = {Tabletop Benchmark: a benchmark of how well language models generate tabletop exercises},
   author       = {Crowley, Matt},
   year         = {2026},
   howpublished = {\url{https://github.com/actionstations-ai/tabletop-bench}},

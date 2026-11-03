@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Tabletop Bench Leaderboard</title>
+    <title>Tabletop Benchmark Leaderboard</title>
     <meta
       name="description"
       content="Leaderboard of how well language models generate tabletop exercises, scored without a judge model."
@@ -134,11 +134,11 @@
   <body>
     <header>
       <div class="wrap">
-        <h1>Tabletop Bench</h1>
+        <h1>Tabletop Benchmark</h1>
         <p>
           How well language models generate tabletop exercises, scored by rules and not by a judge
           model. <a href="https://github.com/actionstations-ai/tabletop-bench">Methods and code</a>,
-          <a href="https://huggingface.co/datasets/mdctric/tabletop-bench">dataset</a>.
+          <a href="https://huggingface.co/datasets/actionstations/tabletop-benchmark">dataset</a>.
         </p>
       </div>
     </header>
@@ -171,6 +171,21 @@
         ['Status', (r) => r.status, false],
         ['Runs', (r) => String(r.runs), true],
       ]
+      const LEVELS = { will_work: 'Will work', risky: 'Risky', wont_work: "Won't work" }
+      const MINI_COLUMNS = [
+        ['Model', (r) => r.model, false],
+        ['Quantization', (r) => r.quantization ?? 'n/a', false],
+        ['Profile', (r) => r.profile, false],
+        ['Verdict', (r) => LEVELS[r.verdict] ?? r.verdict, false],
+        ['Score', (r) => String(r.score), true],
+        ['Format', (r) => num(r.probes.format), true],
+        ['Long prompt', (r) => num(r.probes.longContext), true],
+        ['Long output', (r) => num(r.probes.longOutput), true],
+        ['Review', (r) => num(r.probes.review), true],
+        ['Tokens/s', (r) => num(r.tokensPerSecond), true],
+        ['Seconds', (r) => String(r.totalSeconds), true],
+        ['Status', (r) => r.status, false],
+      ]
       const num = (n) => (n === null || n === undefined ? 'n/a' : String(n))
       const el = (tag, text, cls) => {
         const e = document.createElement(tag)
@@ -191,7 +206,7 @@
         return box
       }
 
-      function table(set, rows) {
+      function table(columns, set, rows) {
         const wrap = el('div', undefined, 'scroll')
         wrap.tabIndex = 0
         wrap.setAttribute('role', 'region')
@@ -199,7 +214,7 @@
         const t = el('table')
         t.append(el('caption', set))
         const head = el('tr')
-        for (const [name, , numeric] of COLUMNS) {
+        for (const [name, , numeric] of columns) {
           const th = el('th', name, numeric ? 'n' : '')
           th.scope = 'col'
           head.append(th)
@@ -210,7 +225,7 @@
         const body = el('tbody')
         rows.forEach((r, i) => {
           const tr = el('tr')
-          for (const [name, get, numeric] of COLUMNS) {
+          for (const [name, get, numeric] of columns) {
             const cls = (numeric ? 'n ' : '') + (name === 'Status' ? 'status' : '')
             tr.append(el('td', get(r, i), cls.trim()))
           }
@@ -235,11 +250,24 @@
         document.getElementById('generated').textContent =
           'Generated ' + String(board.generatedAt).slice(0, 10) + '.'
         if (board.empty || !board.rows.length) return out.append(emptyState())
+        out.append(el('h2', 'Tabletop Benchmark'))
         const sets = [...new Set(board.rows.map((r) => r.taskSet))]
+        if (!sets.length) out.append(el('p', 'First results coming.'))
         for (const set of sets) {
-          out.append(table(set, board.rows.filter((r) => r.taskSet === set)))
+          out.append(table(COLUMNS, set, board.rows.filter((r) => r.taskSet === set)))
           out.append(el('p', ''))
         }
+        out.append(el('h2', 'Tabletop Mini Benchmark'))
+        out.append(
+          el(
+            'p',
+            'A screening: four fixed model calls and a verdict in minutes. It is never ranked with the full benchmark.',
+            'legend',
+          ),
+        )
+        const mini = board.mini ?? []
+        if (!mini.length) return out.append(el('p', 'First results coming.'))
+        out.append(table(MINI_COLUMNS, 'Tabletop Mini Benchmark', mini))
       }
       main()
     </script>

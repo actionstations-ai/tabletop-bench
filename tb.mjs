@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Tabletop Bench command line. Node 20+, no dependencies. See docs/SUBMITTING.md.
+// Tabletop Benchmark command line. Node 20+, no dependencies. See docs/SUBMITTING.md.
 //
 //   node tb.mjs check                       verify every task set against its hash
-//   node tb.mjs run --app <checkout> --suite standard --models lmstudio:<id> [--add]
+//   node tb.mjs run --app <checkout> --suite standard|quick|mini --models lmstudio:<id>[,…] [--add]
 //   node tb.mjs add <run.json>              validate a run file, copy it to results/, rebuild
 //   node tb.mjs verify <results file> <rerun.json>   compare a maintainer rerun, record the outcome
 //   node tb.mjs build                       regenerate the leaderboard, README table and dist/hf
@@ -68,7 +68,8 @@ function run(args) {
     )
   const out = mkdtempSync(join(tmpdir(), 'tabletop-bench-'))
   const passthrough = args.filter((a) => a !== '--add' && a !== '--app' && a !== get('--app'))
-  const r = spawnSync('pnpm', ['bench', '--', '--out', out, ...passthrough], { cwd: app, stdio: 'inherit' })
+  const script = suite === 'mini' ? 'bench:mini' : 'bench'
+  const r = spawnSync('pnpm', [script, '--', '--out', out, ...passthrough], { cwd: app, stdio: 'inherit' })
   if (r.status !== 0) fail('The app benchmark failed; nothing was added.')
   const files = readdirSync(out).filter((f) => f.endsWith('.json') && f !== 'state.json')
   for (const f of files) {
@@ -109,6 +110,8 @@ function verify(resultName, rerunPath) {
   const submittedPath = resolve(resultName)
   const submitted = readJson(submittedPath)
   const rerun = readJson(resolve(rerunPath))
+  if (submitted.kind === 'mini' || rerun.kind === 'mini')
+    fail('Mini results are screenings and are not verified. Run the full benchmark to verify a model.')
   const sets = listTaskSets(ROOT)
   for (const [label, r] of [['submitted', submitted], ['rerun', rerun]]) {
     const v = validateRun(r, sets)
@@ -138,7 +141,7 @@ function build() {
   const board = buildLeaderboard(results, verifications)
   const body = leaderboardMarkdown(board)
   writeJson(join(ROOT, 'leaderboard', 'leaderboard.json'), board)
-  writeFileSync(join(ROOT, 'leaderboard', 'LEADERBOARD.md'), `# Tabletop Bench leaderboard\n\n${body}`)
+  writeFileSync(join(ROOT, 'leaderboard', 'LEADERBOARD.md'), `# Tabletop Benchmark leaderboard\n\n${body}`)
   const readme = join(ROOT, 'README.md')
   if (existsSync(readme)) writeFileSync(readme, spliceBetween(readFileSync(readme, 'utf8'), body))
   buildHf(results, verifications)

@@ -1,4 +1,4 @@
-// Tests of the Tabletop Bench tooling: task-set hashes, run validation, verification tolerance,
+// Tests of the Tabletop Benchmark tooling: task-set hashes, run validation, verification tolerance,
 // leaderboard selection and escaping. They double as documentation of the rules.
 import assert from 'node:assert/strict'
 import { dirname, join } from 'node:path'
@@ -49,8 +49,8 @@ function makeRun(over = {}) {
 }
 
 describe('task sets', () => {
-  it('ship with both suites and every file matches its hash', () => {
-    assert.deepEqual(sets.map((s) => s.name), ['quick-v1', 'standard-v1'])
+  it('ship with the quick, standard and mini suites and every file matches its hash', () => {
+    assert.deepEqual(sets.map((s) => s.name), ['mini-v1', 'quick-v1', 'standard-v1'])
     for (const s of sets) assert.deepEqual(checkTaskSet(s), { ok: true, problems: [] })
   })
 
@@ -121,7 +121,9 @@ describe('leaderboard', () => {
   it('says first results are coming when there are no results', () => {
     const board = buildLeaderboard([], {})
     assert.equal(board.empty, true)
-    assert.equal(leaderboardMarkdown(board).trim(), EMPTY_TEXT)
+    const text = leaderboardMarkdown(board)
+    assert.equal(text.split(EMPTY_TEXT).length - 1, 2)
+    assert.match(text, /### Tabletop Mini Benchmark/)
   })
 
   it('ranks by overall score and shows status as text', () => {
@@ -146,5 +148,69 @@ describe('leaderboard', () => {
     assert.equal(md('a|b*c'), 'a\\|b\\*c')
     const text = `x\n${BEGIN}\nold\n${END}\ny`
     assert.equal(spliceBetween(text, 'new'), `x\n${BEGIN}\n\nnew\n\n${END}\ny`)
+  })
+})
+
+describe('Tabletop Mini Benchmark', () => {
+  const mini = sets.find((s) => s.name === 'mini-v1')
+  const probe = (score = 80) => ({ ok: true, score, metrics: {} })
+  const makeMini = (over = {}) => ({
+    formatVersion: 1,
+    kind: 'mini',
+    suite: 'mini',
+    suiteVersion: 1,
+    scoringVersion: 1,
+    taskSetHash: mini.manifest.hash,
+    appVersion: '0.6.2',
+    appCommit: 'abc',
+    startedAt: '2026-11-10T10:00:00.000Z',
+    model: {
+      ref: 'lmstudio:vendor/model-9b',
+      tool: 'lmstudio',
+      name: 'vendor/model-9b',
+      quantization: '4bit',
+      inference: { profile: 'model-9b' },
+    },
+    hardware: { platform: 'darwin', arch: 'arm64', ramGb: 64 },
+    probes: { format: probe(100), longContext: probe(70), longOutput: probe(90), review: probe(60) },
+    speed: { outputTokensPerSecond: 55, totalSeconds: 300 },
+    score: 78,
+    verdict: { level: 'will_work', reasons: ['all probes ran'] },
+    ...over,
+  })
+  const entry = (file, run) => ({ file, suiteDir: 'mini-v1', run })
+
+  it('accepts a complete Mini run and refuses a bad verdict, a mock model and paths', () => {
+    assert.equal(validateRun(makeMini(), sets).ok, true)
+    assert.match(validateRun(makeMini({ verdict: { level: 'great' } }), sets).problems.join(), /verdict/)
+    assert.equal(validateRun(makeMini({ model: { ...makeMini().model, tool: 'mock' } }), sets).ok, false)
+    assert.equal(validateRun(makeMini({ note: '/Users/someone/run' }), sets).ok, false)
+  })
+
+  it('keeps the Mini task set apart from the others', () => {
+    assert.equal(validateRun(makeMini({ taskSetHash: standard.manifest.hash }), sets).ok, false)
+  })
+
+  it('lists Mini results in their own table with the verdict as text, never with the full ranking', () => {
+    const board = buildLeaderboard([entry('m.json', makeMini()), { file: 'a.json', suiteDir: 'standard-v1', run: makeRun() }], {})
+    assert.equal(board.rows.length, 1)
+    assert.equal(board.mini.length, 1)
+    const text = leaderboardMarkdown(board)
+    assert.match(text, /### Tabletop Mini Benchmark/)
+    assert.match(text, /\| Will work \| 78 \|/)
+    assert.match(text, /\| community \|/)
+  })
+
+  it('says first results are coming for each benchmark with no results', () => {
+    const board = buildLeaderboard([entry('m.json', makeMini())], {})
+    assert.equal(board.empty, false)
+    assert.match(leaderboardMarkdown(board), /### Tabletop Benchmark\n\nFirst results coming\./)
+    assert.match(leaderboardMarkdown(buildLeaderboard([], {})), /First results coming\./)
+  })
+
+  it('shows the latest run of a model setting', () => {
+    const newer = makeMini({ startedAt: '2026-12-01T00:00:00.000Z', score: 50, verdict: { level: 'risky', reasons: ['x'] } })
+    const board = buildLeaderboard([entry('old.json', makeMini()), entry('new.json', newer)], {})
+    assert.deepEqual(board.mini.map((r) => [r.file, r.verdict]), [['new.json', 'risky']])
   })
 })

@@ -63,7 +63,42 @@ median, and the overall range. A range wider than 15 points is flagged **unstabl
 
 Context length is 32,768 tokens; stages send up to about 30,000 input tokens.
 
+## Tabletop Mini Benchmark
+
+A screening, not a ranking. Task set `mini-v1`; one seed (11); context 32,768 tokens. Each probe
+re-runs one stage of the app's pipeline on a bundled example's hand-corrected scenario, so the
+upstream inputs (phase plan, roles, MSEL, corpus) are the same for every model, and each probe
+works on its own copy of the example.
+
+| Probe | Call | Scored with |
+| --- | --- | --- |
+| Format | `scenario_overview`, city water | valid structured output; repair rounds |
+| Long prompt | `msel_phase`, last phase, chemical plant (the prompt carries the corpus, plan, roles and the earlier phases' rows) | the lint, citation (resolution, coverage, source check) and structure scorers of the full benchmark, on that phase's rows: lint 0.3, citations 0.3, structure 0.4 |
+| Long output | `controller_handbook`, city water | sections present (0.5) and share of repeated 6-word phrases (0.5); a length cut-off is a failed call |
+| Review | critique and revision of the county 911 case with planted defects | the full benchmark's critique scorer: recall, fixed, damage to correct rows, noise |
+| Speed | the calls above | output tokens per second; size and time of the long-prompt call |
+
+**Time cap.** A call that runs longer than 180 seconds is cancelled and recorded as a failure.
+
+**Mini score** = format 0.10, long prompt 0.35, long output 0.20, review 0.35.
+
+**Verdict.**
+
+- *Won't work*: the format, long-prompt or long-output call failed, was cut off or timed out; or the Mini score is under 45.
+- *Risky*: all calls ran and any of: score under 60; a repair round in a generation call; a handbook with 25% or more repeated phrases; a review that damages 10% or more of correct rows, finds under 30% of planted defects, or failed; under 15 output tokens per second; the long prompt taking over 150 seconds.
+- *Will work*: none of the above.
+
+Thresholds are in `tasks/mini-v1/suite.json` and are part of the task-set hash. The review damage
+warning follows from the 2026-11-03 runs, where one model's review rewrote correct rows; critique
+remains advisory in the full benchmark. A held-out review case on another organization is run by
+the maintainers and is not in the published task set. A model whose failure depends on its own
+earlier output can pass the Mini's fixed inputs; the full benchmark is the check for that.
+
 ## Fields in every result
+
+(The Mini run file has the same identifying fields plus `probes`, `speed`, `score` and `verdict`
+instead of repeats and medians.)
+
 
 Suite, suite version, scoring version, task-set hash, app version and commit, prompt hashes,
 corpus hashes, embedder, model (name, tool, quantization, size, digest, context length,
