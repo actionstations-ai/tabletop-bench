@@ -62,7 +62,7 @@ time limit on a call. About ten minutes for a 30B model; the same command runs a
 
 | Probe       | The model                                                                              | What counts                                                              |
 | ----------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Format      | writes the scenario overview as structured output                                      | a valid answer on the first try                                          |
+| Format      | writes the scenario overview as structured output                                      | a valid answer (a repair round is not a failure)                         |
 | Long prompt | writes a full 18-row phase of a chemical plant scenario from a 20 to 30K-token prompt  | pace, purpose-tag mix, citations, structure and lint against the reference |
 | Long output | writes the controller handbook for a water utility MSEL                                | all sections, enough text, no repetition                                 |
 | Review      | reviews a county 911 scenario with planted defects                                     | each planted defect found or fixed                                       |
@@ -70,8 +70,10 @@ time limit on a call. About ten minutes for a 30B model; the same command runs a
 **Mini score = Quality x Completion.**
 
 - **Completion** is the chance that a full scenario drafts with no failed stage: the share of Mini
-  calls that succeeded first time (no failure, no repair round, no reply cut off and asked again),
-  raised to the 14 model calls in a scenario. The per-call rate is shown too.
+  calls that did not fail (a call fails only after the app's normal repair policy, or if it stalls
+  or loops), raised to the 14 model calls in a scenario. It is shown with the observed count, such
+  as "0 failures in 10 calls", and the repair rate is reported apart. About ten calls detect
+  frequent failures, not rare ones.
 - **Quality** (0 to 100) is the share of fixed criteria the replies meet, against the Scenario 3
   reference and the planted defects.
 

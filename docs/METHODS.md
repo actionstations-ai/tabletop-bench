@@ -84,15 +84,20 @@ the full benchmark may be reported as a cross-check and changes nothing here.
 
 ### Mini score = Quality x Completion
 
-**Completion** is the chance that a full scenario drafts with no failed stage. A call is a
-*first-try success* when it returns a usable reply with no failure, no repair round and no reply
-cut off at the length limit and asked again. The per-call rate is the share of first-try successes
-over every Mini call of both runs. Completion is that rate raised to the number of model calls in a
-scenario. The pipeline makes one call per stage and one `msel_phase` call per phase: scenario
+**Completion** is the chance that a full scenario drafts with no failed stage. A call
+*fails* only if it fails after the app's normal repair policy (the automatic repair round and the
+longer-answer retry are the app's own retries, invisible to users) or if it stalls or loops. The
+per-call rate is the share of calls that did not fail, over every Mini call of both runs.
+Completion is that rate raised to the number of model calls in a scenario. The **repair rate**, the
+share of calls that needed a repair round or a longer-answer retry, is reported in its own column;
+it is not a failure and does not enter completion, and its cost is in the measured draft time. The pipeline makes one call per stage and one `msel_phase` call per phase: scenario
 overview, objectives and roles, phase plan, four MSEL phases, controller handbook, rubric,
 evaluation guides, player briefing, hot wash, situation manual and review, which is **14 calls**.
-Completion falls fast: 98% of calls succeeding first time gives 75%, and one failure in eight Mini
-calls gives 15%.
+Completion falls fast: 98% of calls succeeding gives 75%, and one failure in eight Mini calls
+gives 15%. Completion is shown with the observed count ("0 failures in 10 calls"). **Detection
+power:** the Mini makes 8 calls (10 with the held-out review), so it detects frequent failures, not
+rare ones. A model that fails 1 call in 20 shows no failure in ten calls 60% of the time and then
+reads 100%. The full benchmark is the check for rare failures.
 
 **Quality** is the share of criteria met, 0 to 100, over the replies the model delivered. A call
 that returned nothing adds no criteria; it costs completion, so a failure is counted once. The
