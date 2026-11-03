@@ -1,0 +1,16 @@
+{
+  "formatVersion": 1,
+  "suite": "quick",
+  "suiteVersion": 1,
+  "scoringVersion": 1,
+  "hash": "83afd0e802a396af2a1502d72c71e2dfd4760898a74ca589218e29f7077eb2f0",
+  "files": {
+    "corpus.json": "c43d9feacf6df2f69eae9952a6a2b521ff077f16537c7d8e5d7408376b10a957",
+    "defects/city-water-chem.json": "fc99113f79b2adf40056170fd327cdecebf9404ab30efc6f63054fa47a47e840",
+    "defects/county-911-storm-tdos.json": "177304aaab3ea9e1d6649e9afecf7f1f2619f37a5899a6d5fdea855b13ce33d2",
+    "gold/scenario-3.json": "6b1614a5720cc37e4f7d5aae6c903f6d26fde968daab46dd745961438ed5a882",
+    "judge/bench_judge.md": "0628617b998d1be71c88e1e35414e5c4811319ec1a4fc8c52f55030faf63c5cb",
+    "judge/calibration-rows.json": "3c9580b898c1b176d9bab65cbd426be6cafc957c783f72df612298532829b42a",
+    "suite.json": "b1dd128b2aa086ce52e8edd2176b42eb6cb8a68614bad65f84d986bc80dd09c9"
+  }
+}

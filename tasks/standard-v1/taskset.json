@@ -1,0 +1,20 @@
+{
+  "formatVersion": 1,
+  "suite": "standard",
+  "suiteVersion": 1,
+  "scoringVersion": 1,
+  "hash": "da8f733526a9d3d45f93ffa84940fb9039b9f2e50f73fbb5be30864f63b62716",
+  "files": {
+    "corpus.json": "e4ea0eadeaded20325747f45a241d9a6a1c2223633e4250320d977397790e84e",
+    "defects/airport-ncia-scenario-5.json": "86dc90e199ed490fce9cf0112023ece01008779310b4c7f1bfcdb66f59ddaae8",
+    "defects/airport-ncia-scenario-6.json": "88a31f8411c1b46abf1f2e78c5565e453802341615894190a8c8b88021c07077",
+    "defects/airport-ncia-scenario-7.json": "967392a6f18f5fd129ea088387e85eef29f7bc68e93e53b4acc1712c4697b5f4",
+    "defects/city-water-chem.json": "fc99113f79b2adf40056170fd327cdecebf9404ab30efc6f63054fa47a47e840",
+    "defects/city-water-tank.json": "0b613c0e781baa1633d78e82d8dcc339cf0206a666d1296a8079df6d27c926e6",
+    "defects/county-911-storm-tdos.json": "177304aaab3ea9e1d6649e9afecf7f1f2619f37a5899a6d5fdea855b13ce33d2",
+    "gold/scenario-3.json": "6b1614a5720cc37e4f7d5aae6c903f6d26fde968daab46dd745961438ed5a882",
+    "judge/bench_judge.md": "0628617b998d1be71c88e1e35414e5c4811319ec1a4fc8c52f55030faf63c5cb",
+    "judge/calibration-rows.json": "3c9580b898c1b176d9bab65cbd426be6cafc957c783f72df612298532829b42a",
+    "suite.json": "a21ebe4c47feb31b0f513f8f12e4275ae9ddf96e1ddcd780788353943c7e2dbf"
+  }
+}

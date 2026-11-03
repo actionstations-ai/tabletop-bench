@@ -1,0 +1,116 @@
+{
+  "airport-ncia": {
+    "corpusHash": "46840af28f6e4938",
+    "briefs": {
+      "airport-ncia-scenario-5": {
+        "durationHours": 2,
+        "phaseCount": 5,
+        "learningObjectives": [
+          "Can IT read PACS logs, identify frequency anomalies, and correlate events across readers?",
+          "Do students understand the difference between 125 kHz and 13.56 MHz credentials, and why legacy support creates a cloning vulnerability?",
+          "Do students recognize that a physical intrusion (badge clone) can be the delivery mechanism for a cyber attack (rogue AP)?",
+          "Do students understand the need to protect network infrastructure rooms with the same rigor as other sensitive areas?",
+          "Can IT identify a trunk port misconfiguration, understand its implications, and develop a containment strategy?"
+        ],
+        "constraints": [
+          "puzzle-driven: the IT team leads and the evidence has a specific answer"
+        ],
+        "audience": [
+          "IT/Cybersecurity",
+          "Airport Operations",
+          "Security & Law Enforcement",
+          "Public Information (PIO)"
+        ],
+        "userPrompt": "A cloned vendor badge is used to plant a rogue wireless access point in a network infrastructure room; IT must assemble the PACS, CCTV and switch evidence to find it and decide how to contain it.",
+        "startWallClock": "07:42",
+        "threatFamily": "cyber_physical"
+      },
+      "airport-ncia-scenario-6": {
+        "durationHours": 2,
+        "phaseCount": 5,
+        "learningObjectives": [
+          "Follow evidence instead of assumptions when diagnosing an outage (diagnostic rigor)",
+          "Resist confirmation bias when real but unrelated events make an attack theory feel true",
+          "Identify change management failures (self-approval, no peer review, no post-change verification) as systemic root causes",
+          "Communicate under uncertainty without prematurely declaring a cyberattack",
+          "Balance accountability and blame when the cause is an internal error"
+        ],
+        "constraints": [
+          "puzzle-driven: three theories, two red herrings, one correct answer"
+        ],
+        "audience": [
+          "Airport Operations",
+          "IT/Cybersecurity",
+          "Public Information (PIO)",
+          "Security, Legal & Compliance"
+        ],
+        "userPrompt": "Every POS terminal in the airport goes dark two minutes after the IT Manager's emergency firewall rule, while a real SSH scan and a vendor firmware push make a cyberattack and a supply-chain compromise look equally plausible.",
+        "startWallClock": "09:50",
+        "threatFamily": "infrastructure_failure"
+      }
+    }
+  },
+  "city-water": {
+    "corpusHash": "7cc3b96b64cbd8ad",
+    "briefs": {
+      "city-water-chem": {
+        "durationHours": 4,
+        "phaseCount": 4,
+        "learningObjectives": [],
+        "constraints": [],
+        "audience": [
+          "Water Operations",
+          "SCADA / IT",
+          "Public Information",
+          "Water Quality / Lab",
+          "Security"
+        ],
+        "userPrompt": "Shortly after 08:30 a remote-support session through the DosaTech ScreenBridge agent on MBW-HMI-02 in the Chemical Building raises the Caustic Feed System dose setpoint (NAOH-FC-203) step by step toward 40 mg/L while the single duty operator is on rounds; finished-water pH climbs on AIT-302, the hard-wired high-high switch PSH-302 and a grab sample disagree with what the HMI trend shows. Vendor remote access, manual chemical feed, isolating the control network, Ohio EPA notification and the Do Not Drink decision for Zone 1.",
+        "threatFamily": "cyber_physical"
+      },
+      "city-water-ransomware": {
+        "durationHours": 4,
+        "phaseCount": 4,
+        "learningObjectives": [],
+        "constraints": [
+          "Every email address of the City and the department uses the exercise domain millbrook-oh.example; outside parties use fictional domains and the fictional outlets of the communications plan (Channel 4, the Millbrook Courier); never a real agency, company or newspaper domain.",
+          "Player roles are only those in the audience list; outside parties (City IT's vendors, the FBI, CISA, Ohio EPA DDAGW, the Carver County Health Commissioner, the media) are played by the SimCell, not seated as players."
+        ],
+        "audience": [
+          "Water Operations",
+          "SCADA / IT",
+          "Public Information",
+          "Water Quality / Lab",
+          "Customer Service"
+        ],
+        "userPrompt": "Ransomware detonates on the business network at City Hall on a Monday morning: the billing system MBW-CIS-01, the AMI head-end MBW-AMI-01 and the file server MBW-FS-01 are encrypted and a ransom note names the city. The SCADA domain MBWSCADA trusts the business domain and firewall rule FW-R-17 carries SMB from the engineering workstation to the backup server MBW-BKP-01, so City IT wants to island the control network while the plant decides whether to go to manual operations, customer service loses billing and the outage map, and the mayor asks whether the water is safe.",
+        "threatFamily": "cyber"
+      }
+    }
+  },
+  "county-911": {
+    "corpusHash": "5e9351a799792be2",
+    "briefs": {
+      "county-911-storm-tdos": {
+        "durationHours": 4,
+        "phaseCount": 4,
+        "learningObjectives": [],
+        "constraints": [
+          "Every email address of the district and the county uses the exercise domain rookecd.example; outside parties use fictional domains and fictional outlet names (Channel 12, The Halden Herald); never a real agency, company or newspaper domain.",
+          "Player roles are only those in the audience list; outside parties (the state ESInet NOC, Tamarack County Communications, vendors, the managed SOC, the FBI, CISA, the Indiana State Police, reporters) are played by the SimCell, not seated as players."
+        ],
+        "audience": [
+          "Command / 911 Director",
+          "Floor Operations",
+          "Technology / CAD and County IT",
+          "Radio",
+          "Field Agencies (Sheriff, Police, Fire/EMS)",
+          "Public Information"
+        ],
+        "userPrompt": "A Thursday evening in May: at 18:40 the National Weather Service issues a tornado warning for northern Rook County and B-shift supervisor Mike Delgado activates the North sirens from Position 11. At 18:52 the 10-digit lines fill with silent and recorded-message calls that conference several call takers at once; at 19:05 the same pattern appears on 911 over SIP trunk group A, the ACD wallboard shows 9 calls in queue and a real structure-fire call from Marlow waits 70 seconds. At 19:15 RespondCAD (CAD-APP01) freezes at Position 4 and Position 9, Hoosier Shield Managed Security reports malware beaconing from RCECD-POS09 and CAD-MDS01, and Medic 3 shows as available on CAD while on a call. At 19:30 a calm caller on a VoIP number reports a hostage situation at County Commissioner Ellen Strand's home, and a Facebook post says '911 is down, call 555-0177' (not an RCECD number). Turning on the GateKeeper TDoS-strict rules for the 10-digit lines, asking the state ESInet NOC for call-source analysis and whether to reroute all 911 to Tamarack County Communications (OPS-DR-2), going to cards (RCECD-F-11) and firewalling the CAD segment at CAD-FW01 (CYB-DR-1), storm reports on SO TAC 1, the swatting response posture, preserving REC-01 recordings, CJIS reporting to the Indiana State Police, and the PIO's alternate-number message and WEA with Rook County Emergency Management.",
+        "startWallClock": "18:30",
+        "threatFamily": "cyber"
+      }
+    }
+  }
+}

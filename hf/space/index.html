@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tabletop Bench Leaderboard</title>
+    <meta
+      name="description"
+      content="Leaderboard of how well language models generate tabletop exercises, scored without a judge model."
+    />
+    <style>
+      :root {
+        --bg: #fbf8f0;
+        --surface: #ffffff;
+        --text: #14213d;
+        --muted: #4a5568;
+        --ink: #14213d;
+        --accent: #b3261e;
+        --signal: #ffc61a;
+        --navy: #14213d;
+        --on-navy: #ffffff;
+        --space: 1rem;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --bg: #0e1526;
+          --surface: #172038;
+          --text: #f3f1ea;
+          --muted: #b8c0d0;
+          --ink: #f3f1ea;
+          --accent: #ff8a80;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font: 1rem/1.6 Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+      }
+      header {
+        background: var(--navy);
+        color: var(--on-navy);
+        padding: 2.5rem 1rem;
+      }
+      .wrap {
+        max-width: 72rem;
+        margin: 0 auto;
+        padding: 0 1rem;
+      }
+      h1 {
+        margin: 0 0 0.5rem;
+        font-size: clamp(2rem, 6vw, 3rem);
+        line-height: 1.1;
+      }
+      header p {
+        margin: 0;
+        max-width: 60ch;
+        color: #dfe5f1;
+      }
+      main {
+        padding: 2rem 0 3rem;
+      }
+      a {
+        color: inherit;
+        text-underline-offset: 3px;
+      }
+      header a {
+        color: var(--signal);
+      }
+      a:focus-visible {
+        outline: 3px solid var(--signal);
+        outline-offset: 2px;
+      }
+      .empty {
+        background: var(--surface);
+        border: 2px solid var(--ink);
+        border-radius: 6px;
+        padding: 1.5rem;
+      }
+      .empty h2 {
+        margin: 0 0 0.5rem;
+      }
+      .scroll {
+        overflow-x: auto;
+        border: 2px solid var(--ink);
+        border-radius: 6px;
+        background: var(--surface);
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 44rem;
+        font-size: 0.9375rem;
+      }
+      caption {
+        text-align: left;
+        font-weight: 700;
+        padding: 0.75rem;
+      }
+      th,
+      td {
+        padding: 0.5rem 0.75rem;
+        text-align: left;
+        border-top: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
+      }
+      th {
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      td.n,
+      th.n {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .status {
+        font-weight: 700;
+      }
+      .legend {
+        color: var(--muted);
+        font-size: 0.875rem;
+        max-width: 70ch;
+      }
+      footer {
+        padding: 1.5rem 0 3rem;
+        color: var(--muted);
+        font-size: 0.875rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap">
+        <h1>Tabletop Bench</h1>
+        <p>
+          How well language models generate tabletop exercises, scored by rules and not by a judge
+          model. <a href="https://github.com/actionstations-ai/tabletop-bench">Methods and code</a>,
+          <a href="https://huggingface.co/datasets/mdctric/tabletop-bench">dataset</a>.
+        </p>
+      </div>
+    </header>
+    <main class="wrap" id="main">
+      <div id="out" aria-live="polite"><p>Loading the leaderboard.</p></div>
+      <p class="legend">
+        Status: <strong>community</strong> was submitted and not yet reproduced;
+        <strong>verified</strong> was rerun by the maintainers within tolerance;
+        <strong>disputed</strong> was rerun and disagreed. Scores are 0 to 100. Range is the
+        lowest to highest overall score over the seeded repeats.
+      </p>
+    </main>
+    <footer class="wrap">
+      <p>
+        Data: CC BY 4.0. <span id="generated"></span> Made by
+        <a href="https://actionstations.ai/tabletop-bench/">Action Stations</a>.
+      </p>
+    </footer>
+    <script>
+      const COLUMNS = [
+        ['Rank', (r, i) => String(i + 1), true],
+        ['Model', (r) => r.model, false],
+        ['Quantization', (r) => r.quantization ?? 'n/a', false],
+        ['Profile', (r) => r.profile, false],
+        ['Overall', (r) => String(r.overall) + (r.unstable ? ' (unstable)' : ''), true],
+        ['Range', (r) => r.range[0] + ' to ' + r.range[1], true],
+        ['Drafting', (r) => num(r.tasks.drafting), true],
+        ['Critique', (r) => num(r.tasks.critique), true],
+        ['Ideation', (r) => num(r.tasks.ideation), true],
+        ['Status', (r) => r.status, false],
+        ['Runs', (r) => String(r.runs), true],
+      ]
+      const num = (n) => (n === null || n === undefined ? 'n/a' : String(n))
+      const el = (tag, text, cls) => {
+        const e = document.createElement(tag)
+        if (text !== undefined) e.textContent = text
+        if (cls) e.className = cls
+        return e
+      }
+
+      function emptyState() {
+        const box = el('div', undefined, 'empty')
+        box.append(el('h2', 'First results coming'))
+        box.append(
+          el(
+            'p',
+            'No results are published yet. The first runs will use the sampling settings from each model card, and every row will say whether the maintainers reproduced it.',
+          ),
+        )
+        return box
+      }
+
+      function table(set, rows) {
+        const wrap = el('div', undefined, 'scroll')
+        wrap.tabIndex = 0
+        wrap.setAttribute('role', 'region')
+        wrap.setAttribute('aria-label', 'Leaderboard for ' + set)
+        const t = el('table')
+        t.append(el('caption', set))
+        const head = el('tr')
+        for (const [name, , numeric] of COLUMNS) {
+          const th = el('th', name, numeric ? 'n' : '')
+          th.scope = 'col'
+          head.append(th)
+        }
+        const thead = el('thead')
+        thead.append(head)
+        t.append(thead)
+        const body = el('tbody')
+        rows.forEach((r, i) => {
+          const tr = el('tr')
+          for (const [name, get, numeric] of COLUMNS) {
+            const cls = (numeric ? 'n ' : '') + (name === 'Status' ? 'status' : '')
+            tr.append(el('td', get(r, i), cls.trim()))
+          }
+          body.append(tr)
+        })
+        t.append(body)
+        wrap.append(t)
+        return wrap
+      }
+
+      async function main() {
+        const out = document.getElementById('out')
+        out.replaceChildren()
+        let board
+        try {
+          const res = await fetch('leaderboard.json', { cache: 'no-cache' })
+          board = await res.json()
+        } catch {
+          out.append(el('p', 'The leaderboard data could not be loaded.'))
+          return
+        }
+        document.getElementById('generated').textContent =
+          'Generated ' + String(board.generatedAt).slice(0, 10) + '.'
+        if (board.empty || !board.rows.length) return out.append(emptyState())
+        const sets = [...new Set(board.rows.map((r) => r.taskSet))]
+        for (const set of sets) {
+          out.append(table(set, board.rows.filter((r) => r.taskSet === set)))
+          out.append(el('p', ''))
+        }
+      }
+      main()
+    </script>
+  </body>
+</html>

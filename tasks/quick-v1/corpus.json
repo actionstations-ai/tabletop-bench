@@ -1,0 +1,26 @@
+{
+  "city-water": {
+    "corpusHash": "7cc3b96b64cbd8ad",
+    "briefs": {
+      "city-water-chem": {
+        "durationHours": 4,
+        "phaseCount": 4,
+        "learningObjectives": [],
+        "constraints": [],
+        "audience": [
+          "Water Operations",
+          "SCADA / IT",
+          "Public Information",
+          "Water Quality / Lab",
+          "Security"
+        ],
+        "userPrompt": "Shortly after 08:30 a remote-support session through the DosaTech ScreenBridge agent on MBW-HMI-02 in the Chemical Building raises the Caustic Feed System dose setpoint (NAOH-FC-203) step by step toward 40 mg/L while the single duty operator is on rounds; finished-water pH climbs on AIT-302, the hard-wired high-high switch PSH-302 and a grab sample disagree with what the HMI trend shows. Vendor remote access, manual chemical feed, isolating the control network, Ohio EPA notification and the Do Not Drink decision for Zone 1.",
+        "threatFamily": "cyber_physical"
+      }
+    }
+  },
+  "county-911": {
+    "corpusHash": "5e9351a799792be2",
+    "briefs": {}
+  }
+}

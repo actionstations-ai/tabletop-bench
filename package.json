@@ -1,0 +1,14 @@
+{
+  "name": "tabletop-bench",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Tabletop Bench: a benchmark of how well LLMs generate tabletop exercises",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node --test",
+    "check": "node tb.mjs check",
+    "build": "node tb.mjs build"
+  }
+}
