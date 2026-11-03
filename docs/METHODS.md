@@ -30,7 +30,7 @@ there is one implementation that cannot drift. `tb run` compares the task-set ha
 | -------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | Ideation | the plans of an example organization, empty brief, six ideas         | valid ideas, distinctness, citation resolution, threat-family spread, grounding of the "why it teaches" text      |
 | Drafting | a fixed brief (audience, duration, phases, threat family, objectives) | the scenario through the app's stages up to critique and revision (no injects or media)                          |
-| Critique | a corrected scenario with planted defects, the critique stage rerun   | recall of planted defects (right row, defect words), plus a light penalty for notes on clean rows                |
+| Critique | a corrected scenario with planted defects, the critique stage rerun   | planted defects found (a note on the right row with defect words, or undone by the revision), minus damage to correct rows and a light penalty for notes on clean rows |
 
 Planted defect kinds: time order broken; an expected action contradicting its cited section; an
 inject from a player role; a duplicate row; a missing decision point; a facility identifier not in
@@ -45,9 +45,13 @@ Each part is 0 to 100. Weights are in `tasks/<suite>-v<N>/suite.json` and are pa
   - Lint: the app's scenario lint findings weighted by severity, per 10 MSEL rows, capped.
   - Citations: key resolution 0.3, support from the app's deterministic grounding check 0.4, coverage of non-control rows 0.3.
   - Structure: pass or fail items from the gold exercise (pace band, purpose-tag mix, decision point in the decision phase, start and end markers, every player role in every phase, brief identifiers used, no reference leak), weighted.
-- **Critique** = recall 0.85, noise 0.15.
+- **Critique** (scoring version 2) = recall 0.65, noise 0.10, intact 0.25.
+  - Recall: a planted defect counts as found when a note names it or the revision undid it: the edited row is back closer to its correct form than to the planted one, a removed decision point is restored, or a duplicated row is removed or made distinct. Deleting a defective row (other than a duplicate) counts as damage, not a fix. The share fixed by the revision is reported apart.
+  - Damage: the weighted share of rows outside the planted defects that the revision removed, gave a different sender, or rewrote past 60% word overlap in the event or expected action. Pressure, misinformation, clue and red-herring rows weigh three times the others because their content is deliberate. Intact is 100 minus 2 points per percent of damage, floored at 0.
+  - Critique is **advisory**: it is reported but is not part of the recommendation floor.
 - **Ideation** = valid 0.25, distinct 0.20, citation resolution 0.20, threat-family spread 0.15, grounding 0.20. Distinctness uses term-frequency cosine (a pair at 0.85 or more is a duplicate), so it is identical on every machine.
 - **Overall** = drafting 0.5, critique 0.25, ideation 0.25.
+- **Floor** (a result is recommendable): drafting at least 50, drafting reliability at least 90%, ideation at least 50, stable across repeats. Critique recall, fixed and damage are published next to the floor with a plain warning when recall is under 50 or damage is over 10%.
 
 With repeats, a result stores every repeat (seeds 11, 23, 37 in the standard suite), reports the
 median, and the overall range. A range wider than 15 points is flagged **unstable**.
@@ -68,7 +72,7 @@ scores and failures, median, range, unstable flag.
 
 ## Limits
 
-- The task inputs are public, so a model trained on them could overfit. A private held-out suite is a possible later addition and would be labelled as such.
+- The task inputs are public, so a model trained on them could overfit. Four held-out critique cases on other organizations are kept out of the published task sets; a private held-out suite for the other tasks is a possible later addition and would be labelled as such.
 - Deterministic scoring checks structure, grounding and planted defects; it cannot judge whether an exercise is good for a particular team. A model's rank here is evidence about reliability and rule-following, not a replacement for exercise-design review.
 - Seeds fix the sampler, not the runtime: the same seed on different hardware or runtime versions can differ. That is why verification uses a tolerance.
 - Small task sets give wide ranges. Read the range, not only the median.
