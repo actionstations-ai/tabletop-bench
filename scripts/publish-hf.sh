@@ -25,10 +25,12 @@ DATASET="$ORG/tabletop-benchmark"
 SPACE="$ORG/tabletop-benchmark-leaderboard"
 node tb.mjs check
 node tb.mjs build
-hf repo create "$DATASET" --repo-type dataset --private --exist-ok
+exists() { python3 -c "import sys; from huggingface_hub import HfApi; sys.exit(0 if HfApi().repo_exists(sys.argv[1], repo_type=sys.argv[2]) else 1)" "$1" "$2"; }
+# Create only when missing: the create call checks the plan before it checks for an existing repo.
+exists "$DATASET" dataset || hf repo create "$DATASET" --repo-type dataset --private
 hf upload "$DATASET" dist/hf/dataset . --repo-type dataset \
   --commit-message "Update Tabletop Benchmark and Tabletop Mini Benchmark dataset"
-hf repo create "$SPACE" --repo-type space --space_sdk static --private --exist-ok
+exists "$SPACE" space || hf repo create "$SPACE" --repo-type space --space_sdk static --private
 hf upload "$SPACE" dist/hf/space . --repo-type space \
   --commit-message "Update leaderboard"
 echo "https://huggingface.co/datasets/$DATASET"
