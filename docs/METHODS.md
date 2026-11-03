@@ -45,7 +45,7 @@ Each part is 0 to 100. Weights are in `tasks/<suite>-v<N>/suite.json` and are pa
   - Lint: the app's scenario lint findings weighted by severity, per 10 MSEL rows, capped.
   - Citations: key resolution 0.3, support from the app's deterministic grounding check 0.4, coverage of non-control rows 0.3.
   - Structure: pass or fail items from the gold exercise (pace band, purpose-tag mix, decision point in the decision phase, start and end markers, every player role in every phase, brief identifiers used, no reference leak), weighted.
-- **Critique** (scoring version 2) = recall 0.65, noise 0.10, intact 0.25.
+- **Critique** = recall 0.65, noise 0.10, intact 0.25.
   - Recall: a planted defect counts as found when a note names it or the revision undid it: the edited row is back closer to its correct form than to the planted one, a removed decision point is restored, or a duplicated row is removed or made distinct. Deleting a defective row (other than a duplicate) counts as damage, not a fix. The share fixed by the revision is reported apart.
   - Damage: the weighted share of rows outside the planted defects that the revision removed, gave a different sender, or rewrote past 60% word overlap in the event or expected action. Pressure, misinformation, clue and red-herring rows weigh three times the others because their content is deliberate. Intact is 100 minus 2 points per percent of damage, floored at 0.
   - Critique is **advisory**: it is reported but is not part of the recommendation floor.
