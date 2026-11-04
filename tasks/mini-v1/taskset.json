@@ -1,15 +1,15 @@
 {
   "formatVersion": 1,
   "suite": "mini",
-  "suiteVersion": 2,
+  "suiteVersion": 1,
   "scoringVersion": 1,
-  "hash": "ce5ef91d6547f401402cca573eb0eb430bdbaaeca8466241bb6d8db2b57da3ce",
+  "hash": "499a538d4d9cb2fc6560378f2a88da8d6c36f89fa61b577fe1a03392eeadcdbc",
   "files": {
     "corpus.json": "f2b410ef39727074613505034f2dc4e3ab19cc666c3b49ad762506f07428b182",
     "defects/county-911-storm-tdos.json": "177304aaab3ea9e1d6649e9afecf7f1f2619f37a5899a6d5fdea855b13ce33d2",
     "gold/scenario-3.json": "6b1614a5720cc37e4f7d5aae6c903f6d26fde968daab46dd745961438ed5a882",
     "judge/bench_judge.md": "0628617b998d1be71c88e1e35414e5c4811319ec1a4fc8c52f55030faf63c5cb",
     "judge/calibration-rows.json": "3c9580b898c1b176d9bab65cbd426be6cafc957c783f72df612298532829b42a",
-    "suite.json": "0478719d1b5f88037060b56905198c7b9c1811151fa793af0316385452701eea"
+    "suite.json": "23bb8db3ef5a4a2a21b39f0b184f843800e5dc173c606cdc2474ff13af35332c"
   }
 }

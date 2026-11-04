@@ -50,7 +50,7 @@ function makeRun(over = {}) {
 
 describe('task sets', () => {
   it('ship with the quick, standard and mini suites and every file matches its hash', () => {
-    assert.deepEqual(sets.map((s) => s.name), ['mini-v2', 'quick-v1', 'standard-v1'])
+    assert.deepEqual(sets.map((s) => s.name), ['mini-v1', 'quick-v1', 'standard-v1'])
     for (const s of sets) assert.deepEqual(checkTaskSet(s), { ok: true, problems: [] })
   })
 
@@ -152,7 +152,7 @@ describe('leaderboard', () => {
 })
 
 describe('Tabletop Mini Benchmark', () => {
-  const mini = sets.find((s) => s.name === 'mini-v2')
+  const mini = sets.find((s) => s.name === 'mini-v1')
   const range = (value, min = value, max = value) => ({ value, min, max })
   const probe = () => ({ ok: true, firstTry: true, score: 80, criteria: [], metrics: {} })
   const repeat = (seed) => ({
@@ -163,7 +163,7 @@ describe('Tabletop Mini Benchmark', () => {
     formatVersion: 1,
     kind: 'mini',
     suite: 'mini',
-    suiteVersion: 2,
+    suiteVersion: 1,
     scoringVersion: 1,
     taskSetHash: mini.manifest.hash,
     appVersion: '0.6.2',
@@ -194,7 +194,7 @@ describe('Tabletop Mini Benchmark', () => {
     verdict: { level: 'usable', reasons: ['Quality 80'], notes: [] },
     ...over,
   })
-  const entry = (file, run) => ({ file, suiteDir: 'mini-v2', run })
+  const entry = (file, run) => ({ file, suiteDir: 'mini-v1', run })
 
   it('accepts a complete Mini run and refuses a bad verdict, a mock model and paths', () => {
     assert.equal(validateRun(makeMini(), sets).ok, true)

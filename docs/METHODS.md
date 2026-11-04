@@ -65,7 +65,7 @@ Context length is 32,768 tokens; stages send up to about 30,000 input tokens.
 
 ## Tabletop Mini Benchmark
 
-A screening, not a ranking. Task set `mini-v2`; seeds 11 and 12, so every probe runs twice; context
+A screening, not a ranking. Task set `mini-v1`; seeds 11 and 12, so every probe runs twice; context
 32,768 tokens. Each probe re-runs one stage of the app's pipeline on a bundled example's
 hand-corrected scenario, so the upstream inputs (phase plan, roles, MSEL, corpus) are the same for
 every model, and each probe works on its own copy of the example in each run.
@@ -101,7 +101,7 @@ reads 100%. The full benchmark is the check for rare failures.
 
 **Quality** is the share of criteria met, 0 to 100, over the replies the model delivered. A call
 that returned nothing adds no criteria; it costs completion, so a failure is counted once. The
-criteria are fixed pass/fail statements; thresholds are in `tasks/mini-v2/suite.json`.
+criteria are fixed pass/fail statements; thresholds are in `tasks/mini-v1/suite.json`.
 
 | Probe | Criteria |
 | --- | --- |
